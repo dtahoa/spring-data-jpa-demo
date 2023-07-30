@@ -1,5 +1,8 @@
 package com.springdatajpa.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,15 +12,16 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-@AllArgsConstructor
-@Data
-@Builder
 @Entity
 @Table(name="todo", schema = "ecommerce")
-public class Todo implements Serializable {
+public class Todo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    public Todo() {
+
+    }
 
     public long getId() {
         return id;
@@ -57,10 +61,6 @@ public class Todo implements Serializable {
         this.completed = completed;
     }
 
-    public Todo() {
-        // Empty constructor
-    }
-
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -69,4 +69,17 @@ public class Todo implements Serializable {
         this.createdAt = createdAt;
     }
 
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
+    private User user;
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public User getUser() {
+        return user;
+    }
 }
+

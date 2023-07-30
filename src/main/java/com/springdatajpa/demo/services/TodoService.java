@@ -1,5 +1,6 @@
 package com.springdatajpa.demo.services;
 
+import com.springdatajpa.demo.interfaces.TodoUser;
 import com.springdatajpa.demo.interfaces.TodoProjection;
 import com.springdatajpa.demo.interfaces.TodoRequest;
 import com.springdatajpa.demo.entity.Todo;
@@ -36,6 +37,10 @@ public class TodoService {
 
     public List<Todo> findTaskById(Long id) {
         return todoRepository.findTodoById(id);
+    }
+
+    public Todo getTodoById(Long id) {
+        return todoRepository.getTodoById(id);
     }
 
     public List<Todo> findTaskByDescription(String desc) {
@@ -140,19 +145,19 @@ public class TodoService {
     /**
      * Bulk create
      */
-    public void bulkCreateTodoItems(List<TodoRequest> todoRequests) {
-        List<Todo> todoItems = todoRequests.stream()
-                .map(this::mapToTodo)
-                .collect(Collectors.toList());
-        todoRepository.saveAll(todoItems);
-    }
+//    public void bulkCreateTodoItems(List<TodoRequest> todoRequests) {
+//        List<Todo> todoItems = todoRequests.stream()
+//                .map(this::mapToTodo)
+//                .collect(Collectors.toList());
+//        todoRepository.saveAll(todoItems);
+//    }
 
-    private Todo mapToTodo(TodoRequest todoRequest) {
-        Todo todo = new Todo();
-        todo.setCompleted(todoRequest.getCompleted());
-        todo.setTodoItem(todoRequest.getTodoItem());
-        return todo;
-    }
+//    private Todo mapToTodo(TodoRequest todoRequest) {
+//        Todo todo = new Todo();
+//        todo.setCompleted(todoRequest.getCompleted());
+//        todo.setTodoItem(todoRequest.getTodoItem());
+//        return todo;
+//    }
 
     // CACHING
     /**
@@ -189,5 +194,13 @@ public class TodoService {
 
     private List<Todo> fetchAllTodosFromRepository() {
         return (List<Todo>) todoRepository.findAll();
+    }
+
+    public List<Todo> fetchAllTodosByUser(Long userId) {
+        return todoRepository.findTodoByUserId(userId);
+    }
+
+    public TodoUser findTodoWithUser(Long todoId) {
+        return todoRepository.findTodoDTOById(todoId);
     }
 }

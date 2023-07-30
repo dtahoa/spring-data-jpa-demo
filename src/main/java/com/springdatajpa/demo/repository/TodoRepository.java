@@ -2,9 +2,10 @@ package com.springdatajpa.demo.repository;
 
 import com.springdatajpa.demo.entity.Todo;
 import com.springdatajpa.demo.interfaces.TodoProjection;
-import org.springframework.cache.annotation.CacheConfig;
+import com.springdatajpa.demo.interfaces.TodoUser;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -43,4 +44,10 @@ public interface TodoRepository extends PagingAndSortingRepository<Todo, Long> {
     void insertTodo(@Param("completed") String completed, @Param("todoItem") String todoItem, @Param("createdAt") LocalDateTime createdAt);
 
     List<TodoProjection> findAllBy();
+
+    List<Todo> findTodoByUserId(Long userId);
+
+    // Derived query method to fetch Todo with User object
+    @Query("SELECT t, t.user FROM Todo t JOIN FETCH t.user WHERE t.id = :todoId")
+    TodoUser findTodoDTOById(Long todoId);
 }

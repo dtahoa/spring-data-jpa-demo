@@ -1,8 +1,11 @@
 package com.springdatajpa.demo.controllers;
 
 import com.springdatajpa.demo.entity.Todo;
+import com.springdatajpa.demo.entity.TodoDTO;
 import com.springdatajpa.demo.interfaces.TodoProjection;
 import com.springdatajpa.demo.interfaces.TodoRequest;
+import com.springdatajpa.demo.interfaces.TodoUser;
+import com.springdatajpa.demo.repository.TodoRepository;
 import com.springdatajpa.demo.services.CachingService;
 import com.springdatajpa.demo.services.TodoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/todos")
@@ -24,6 +28,9 @@ public class TodoController {
 
 	@Autowired
 	private CachingService cachingService;
+
+	@Autowired
+	private TodoRepository todoRepository;
 
 	// QUERY CREATION
 	@GetMapping
@@ -42,8 +49,29 @@ public class TodoController {
 
 	// QUERY CREATION: FIND BY ID
 	@GetMapping("/{id}")
-	public ResponseEntity<List<Todo>> getTodoById(@PathVariable long id) {
+	public ResponseEntity<List<Todo>> findTodoById(@PathVariable long id) {
 		return ResponseEntity.ok(todoService.findTaskById(id));
+	}
+
+	@GetMapping("/detail/{id}")
+	public ResponseEntity<TodoDTO> getTodoById(@PathVariable long id) {
+//		Todo todo = todoRepository.findById(id)
+//				.orElseThrow(() -> new Error("todoId " + id + "not found"));
+//		TodoDTO todoDto = this.convertToDTO(todo);
+
+		Optional<Todo> optionalTodo = todoRepository.findById(id);
+		TodoDTO res = optionalTodo.map(this::convertToDTO).orElse(null);
+		return new ResponseEntity<>(res, HttpStatus.OK);
+	}
+
+	private TodoDTO convertToDTO(Todo todo) {
+		TodoDTO todoDTO = new TodoDTO();
+		todoDTO.setId(todo.getId());
+		todoDTO.setTodoItem(todo.getTodoItem());
+		todoDTO.setCompleted(todo.getCompleted());
+		todoDTO.setUser(todo.getUser());
+		// Set other fields if needed
+		return todoDTO;
 	}
 
 	// QUERY CREATION: FIND BY DESC
@@ -132,11 +160,11 @@ public class TodoController {
 	}
 
 	// BULK CREATE
-	@PostMapping("/bulk-create")
-	public ResponseEntity<String> bulkCreateTodoItems(@RequestBody List<TodoRequest> todoRequests) {
-		todoService.bulkCreateTodoItems(todoRequests);
-		return ResponseEntity.ok("Todo items created successfully.");
-	}
+//	@PostMapping("/bulk-create")
+//	public ResponseEntity<String> bulkCreateTodoItems(@RequestBody List<TodoRequest> todoRequests) {
+//		todoService.bulkCreateTodoItems(todoRequests);
+//		return ResponseEntity.ok("Todo items created successfully.");
+//	}
 
 	// CACHING
 	@GetMapping("/caching")
@@ -160,5 +188,16 @@ public class TodoController {
 	@GetMapping("/clearAllCaches")
 	public void clearAllCaches() {
 		cachingService.evictAllCaches();
+	}
+
+	// LAZY LOADING
+	@GetMapping("/lazy-loading/{userId}")
+	public ResponseEntity<List<Todo>> lazyLoading(@PathVariable Long userId) {
+		return ResponseEntity.ok(todoService.fetchAllTodosByUser(userId));
+	}
+
+	@GetMapping("/lazy-loading/todo/{id}")
+	public TodoUser lazyLoadingWithUser(@PathVariable Long id) {
+		return todoService.findTodoWithUser(id);
 	}
 }
