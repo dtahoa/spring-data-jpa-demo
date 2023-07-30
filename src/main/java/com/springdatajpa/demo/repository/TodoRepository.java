@@ -28,6 +28,8 @@ public interface TodoRepository extends PagingAndSortingRepository<Todo, Long> {
 
     public List<Todo> findTodoById(Long id);
 
+    public List<Todo> findTodoByTodoItem(String desc);
+
     @Query(value = "SELECT * FROM todo ORDER BY created_at DESC", countQuery = "SELECT COUNT(*) FROM todo", nativeQuery = true)
     Page<Todo> findAllWithPagingAndSorting(Pageable pageable);
 

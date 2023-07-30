@@ -38,6 +38,10 @@ public class TodoService {
         return todoRepository.findTodoById(id);
     }
 
+    public List<Todo> findTaskByDescription(String desc) {
+        return todoRepository.findTodoByTodoItem(desc);
+    }
+
     public List<Todo> findAllCompletedTask() {
         return todoRepository.findByCompletedTrue();
     }
@@ -151,12 +155,29 @@ public class TodoService {
     }
 
     // CACHING
+    /**
+     * The method returns the tasks,
+     only it doesn't find it the cache.
+     *
+     * @return the todos
+     */
     @Cacheable(value = "todos")
     public List<Todo> getAllTodos() {
         return fetchAllTodosFromRepository();
     }
 
-    @CachePut(value = "todos", key = "#result.id")
+    /**
+     * The method returns the tasks,
+     but refreshes all the entries in the cache to load new ones.
+     *
+     * @return the todos
+     */
+    @CacheEvict(value = "todos", allEntries = true)
+    public List<Todo> getAllTodos1() {
+        return fetchAllTodosFromRepository();
+    }
+
+    @CachePut(value = "todos", key = "#todo.id")
     public Todo saveTodo(Todo todo) {
         return todoRepository.save(todo);
     }

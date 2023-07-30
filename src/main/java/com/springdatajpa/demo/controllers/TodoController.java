@@ -3,6 +3,7 @@ package com.springdatajpa.demo.controllers;
 import com.springdatajpa.demo.entity.Todo;
 import com.springdatajpa.demo.interfaces.TodoProjection;
 import com.springdatajpa.demo.interfaces.TodoRequest;
+import com.springdatajpa.demo.services.CachingService;
 import com.springdatajpa.demo.services.TodoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,11 +22,16 @@ public class TodoController {
 	@Autowired
 	private TodoService todoService;
 
+	@Autowired
+	private CachingService cachingService;
+
+	// QUERY CREATION
 	@GetMapping
 	public ResponseEntity<List<Todo>> getAllTodos() {
 		return ResponseEntity.ok(todoService.getAllTask());
 	}
 
+	// QUERY CREATION: CREATE NEW TODO
 	@PostMapping
 	public ResponseEntity<Todo> addTodo(@RequestParam String todoItem, @RequestParam String status) {
 		Todo todo = new Todo(todoItem, status);
@@ -34,9 +40,16 @@ public class TodoController {
 		return ResponseEntity.ok(todoService.createNewTask(todo));
 	}
 
+	// QUERY CREATION: FIND BY ID
 	@GetMapping("/{id}")
 	public ResponseEntity<List<Todo>> getTodoById(@PathVariable long id) {
 		return ResponseEntity.ok(todoService.findTaskById(id));
+	}
+
+	// QUERY CREATION: FIND BY DESC
+	@GetMapping("/desc/{desc}")
+	public ResponseEntity<List<Todo>> findTaskByDescription(@PathVariable String desc) {
+		return ResponseEntity.ok(todoService.findTaskByDescription(desc));
 	}
 
 	@DeleteMapping("/{id}")
@@ -144,4 +157,8 @@ public class TodoController {
 		return ResponseEntity.ok(result);
 	}
 
+	@GetMapping("/clearAllCaches")
+	public void clearAllCaches() {
+		cachingService.evictAllCaches();
+	}
 }
